@@ -27,7 +27,7 @@ app.get('/bikes', async (req, res) => {
     res.json({
       empty_docks: totalEmptyDocks,
       bikes: totalBikesAvailable,
-      energy: energy  // 0-100 ✅
+      energy: energy 
     });
     
   } catch (error) {
