@@ -4,28 +4,33 @@ const app = express();
 
 app.get('/bikes', async (req, res) => {
   try {
-    // 새 Lyft API
     const statusRes = await fetch('https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json');
     const statusData = await statusRes.json();
     
     let totalEmptyDocks = 0;
     let totalBikesAvailable = 0;
+    let totalDisabled = 0;
     
     statusData.data.stations.forEach(station => {
       totalEmptyDocks += station.num_docks_available || 0;
       totalBikesAvailable += station.num_bikes_available || 0;
+      totalDisabled += station.num_bikes_disabled || 0;
     });
     
-    const totalSlots = totalEmptyDocks + totalBikesAvailable;
-    const energy = Math.round((totalEmptyDocks / totalSlots) * 100);
+    const totalCapacity = totalEmptyDocks + totalBikesAvailable + totalDisabled;
+    const energy = Math.round((totalEmptyDocks / totalCapacity) * 100);
     
     console.log('Empty:', totalEmptyDocks);
     console.log('Bikes:', totalBikesAvailable);
+    console.log('Disabled:', totalDisabled);
+    console.log('Capacity:', totalCapacity);
     console.log('Energy:', energy);
     
     res.json({
       empty_docks: totalEmptyDocks,
       bikes: totalBikesAvailable,
+      disabled: totalDisabled,
+      capacity: totalCapacity,
       energy: energy
     });
     
@@ -40,4 +45,4 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Server running!'));
+app.listen(PORT, () => console.log('Server running on port', PORT));
