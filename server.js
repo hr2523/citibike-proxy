@@ -4,40 +4,31 @@ const app = express();
 
 app.get('/bikes', async (req, res) => {
   try {
-    // 1. Station Info (capacity)
-    const infoRes = await fetch('https://gbfs.citibikenyc.com/gbfs/en/station_information.json');
-    const infoData = await infoRes.json();
-    
-    // 2. Station Status (available bikes)
     const statusRes = await fetch('https://gbfs.citibikenyc.com/gbfs/en/station_status.json');
     const statusData = await statusRes.json();
     
-    // capacity 맵 만들기
-    const capacityMap = {};
-    infoData.data.stations.forEach(station => {
-      capacityMap[station.station_id] = station.capacity;
-    });
-    
-    let totalInUse = 0;
+    let totalEmptyDocks = 0;
+    let totalBikesAvailable = 0;
     
     statusData.data.stations.forEach(station => {
-      const stationId = station.station_id;
-      const capacity = capacityMap[stationId] || 0;
-      const available = station.num_bikes_available || 0;
-      const disabled = station.num_bikes_disabled || 0;
-      
-      const inUse = capacity - available - disabled;
-      
-      if (inUse > 0) {
-        totalInUse += inUse;
-      }
+      // 빈 도크 = 사용 중인 자전거
+      totalEmptyDocks += station.num_docks_available || 0;
+      // 사용 가능한 자전거
+      totalBikesAvailable += station.num_bikes_available || 0;
     });
     
-    console.log('Total bikes in use:', totalInUse);
+    console.log('Empty docks:', totalEmptyDocks);
+    console.log('Available bikes:', totalBikesAvailable);
+    
+    // 빈 도크 = 활동량
+    const activity = totalEmptyDocks;
+    const energy = Math.floor(activity / 100);
     
     res.json({
-      bikes: totalInUse,
-      energy: Math.floor(totalInUse / 100)
+      empty_docks: totalEmptyDocks,
+      available_bikes: totalBikesAvailable,
+      activity: activity,
+      energy: energy
     });
     
   } catch (error) {
@@ -52,3 +43,13 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Server running!'));
+```
+
+---
+
+## **개념:**
+```
+빈 도크 많음 = 자전거 많이 사용 중
+빈 도크 적음 = 자전거 스테이션에 있음
+
+→ 빈 도크 수 = NYC 활동량 ✅
