@@ -18,9 +18,10 @@ app.get('/bikes', async (req, res) => {
       totalBikesDisabled += station.num_bikes_disabled || 0;
       totalDocksDisabled += station.num_docks_disabled || 0;
     });
-    
+  
     const totalCapacity = totalBikesAvailable + totalBikesDisabled + totalEmptyDocks + totalDocksDisabled;
-    const energy = Math.round((totalEmptyDocks / totalCapacity) * 100);
+    
+    const usage = Math.round(((totalCapacity - totalEmptyDocks) / totalCapacity) * 100);
     
     res.json({
       empty_docks: totalEmptyDocks,
@@ -28,7 +29,7 @@ app.get('/bikes', async (req, res) => {
       bikes_disabled: totalBikesDisabled,
       docks_disabled: totalDocksDisabled,
       capacity: totalCapacity,
-      energy: energy
+      usage: usage
     });
     
   } catch (error) {
