@@ -11,24 +11,23 @@ app.get('/bikes', async (req, res) => {
     let totalBikesAvailable = 0;
     
     statusData.data.stations.forEach(station => {
-      // 빈 도크 = 사용 중인 자전거
       totalEmptyDocks += station.num_docks_available || 0;
-      // 사용 가능한 자전거
       totalBikesAvailable += station.num_bikes_available || 0;
     });
     
-    console.log('Empty docks:', totalEmptyDocks);
-    console.log('Available bikes:', totalBikesAvailable);
+    const totalSlots = totalEmptyDocks + totalBikesAvailable;
     
-    // 빈 도크 = 활동량
-    const activity = totalEmptyDocks;
-    const energy = Math.floor(activity / 100);
+    // 빈 도크 비율 (0-100)
+    const energy = Math.round((totalEmptyDocks / totalSlots) * 100);
+    
+    console.log('Empty:', totalEmptyDocks);
+    console.log('Bikes:', totalBikesAvailable);
+    console.log('Energy:', energy);
     
     res.json({
       empty_docks: totalEmptyDocks,
-      available_bikes: totalBikesAvailable,
-      activity: activity,
-      energy: energy
+      bikes: totalBikesAvailable,
+      energy: energy  // 0-100 ✅
     });
     
   } catch (error) {
@@ -43,4 +42,3 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Server running!'));
-
