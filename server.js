@@ -7,39 +7,26 @@ app.get('/bikes', async (req, res) => {
     const statusRes = await fetch('https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json');
     const statusData = await statusRes.json();
     
-    let totalEmptyDocks = 0;
-    let totalBikesAvailable = 0;
-    let totalBikesDisabled = 0;
-    let totalDocksDisabled = 0;
+    
+    const TOTAL_FLEET = 35199; 
+    
+    let bikesAtStations = 0;
     
     statusData.data.stations.forEach(station => {
-      totalEmptyDocks += station.num_docks_available || 0;
-      totalBikesAvailable += station.num_bikes_available || 0;
-      totalBikesDisabled += station.num_bikes_disabled || 0;
-      totalDocksDisabled += station.num_docks_disabled || 0;
+      bikesAtStations += (station.num_bikes_available || 0) + (station.num_bikes_disabled || 0);
     });
     
     
-    const dockedBikes = totalBikesAvailable + totalBikesDisabled;
-    
-    
-    const totalSystemCapacity = totalBikesAvailable + totalBikesDisabled + totalEmptyDocks + totalDocksDisabled;
-    
-    
-    const TOTAL_FLEET = 35199; 
-    const bikesInUse = TOTAL_FLEET - dockedBikes;
+    const bikesInUse = TOTAL_FLEET - bikesAtStations;
     
     
     const usage = Math.round((bikesInUse / TOTAL_FLEET) * 100);
     
     res.json({
       total_fleet: TOTAL_FLEET,           
+      bikes_at_stations: bikesAtStations, 
       bikes_in_use: bikesInUse,           
-      bikes_docked: dockedBikes,          
-      bikes_available: totalBikesAvailable, 
-      bikes_disabled: totalBikesDisabled,   
-      empty_docks: totalEmptyDocks,
-      usage: usage                         
+      usage: usage                        
     });
     
   } catch (error) {
