@@ -43,13 +43,4 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Server running!'));
-```
 
----
-
-## **개념:**
-```
-빈 도크 많음 = 자전거 많이 사용 중
-빈 도크 적음 = 자전거 스테이션에 있음
-
-→ 빈 도크 수 = NYC 활동량 ✅
