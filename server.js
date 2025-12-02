@@ -8,7 +8,7 @@ app.get('/bikes', async (req, res) => {
     const statusData = await statusRes.json();
     
     
-    const TOTAL_FLEET = 35199; 
+    const TOTAL_FLEET = 38000; 
     
     let bikesAtStations = 0;
     
