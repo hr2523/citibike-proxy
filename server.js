@@ -18,18 +18,28 @@ app.get('/bikes', async (req, res) => {
       totalBikesDisabled += station.num_bikes_disabled || 0;
       totalDocksDisabled += station.num_docks_disabled || 0;
     });
-  
-    const totalCapacity = totalBikesAvailable + totalBikesDisabled + totalEmptyDocks + totalDocksDisabled;
     
-    const usage = Math.round(((totalCapacity - totalEmptyDocks) / totalCapacity) * 100);
+    
+    const dockedBikes = totalBikesAvailable + totalBikesDisabled;
+    
+    
+    const totalSystemCapacity = totalBikesAvailable + totalBikesDisabled + totalEmptyDocks + totalDocksDisabled;
+    
+    
+    const TOTAL_FLEET = 35199; 
+    const bikesInUse = TOTAL_FLEET - dockedBikes;
+    
+    
+    const usage = Math.round((bikesInUse / TOTAL_FLEET) * 100);
     
     res.json({
+      total_fleet: TOTAL_FLEET,           
+      bikes_in_use: bikesInUse,           
+      bikes_docked: dockedBikes,          
+      bikes_available: totalBikesAvailable, 
+      bikes_disabled: totalBikesDisabled,   
       empty_docks: totalEmptyDocks,
-      bikes: totalBikesAvailable,
-      bikes_disabled: totalBikesDisabled,
-      docks_disabled: totalDocksDisabled,
-      capacity: totalCapacity,
-      usage: usage
+      usage: usage                         
     });
     
   } catch (error) {
