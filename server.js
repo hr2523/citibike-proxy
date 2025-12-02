@@ -4,39 +4,40 @@ const app = express();
 
 app.get('/bikes', async (req, res) => {
   try {
-    console.log('Fetching Citibike data...');
-    const response = await fetch('https://gbfs.citibikenyc.com/gbfs/en/station_status.json');
-    const data = await response.json();
+    // 1. Station Info (capacity)
+    const infoRes = await fetch('https://gbfs.citibikenyc.com/gbfs/en/station_information.json');
+    const infoData = await infoRes.json();
     
-    console.log('Total stations:', data.data.stations.length);
+    // 2. Station Status (available bikes)
+    const statusRes = await fetch('https://gbfs.citibikenyc.com/gbfs/en/station_status.json');
+    const statusData = await statusRes.json();
+    
+    // capacity 맵 만들기
+    const capacityMap = {};
+    infoData.data.stations.forEach(station => {
+      capacityMap[station.station_id] = station.capacity;
+    });
     
     let totalInUse = 0;
-    let debugCount = 0;
     
-    data.data.stations.forEach(station => {
-      const capacity = station.capacity || 0;
+    statusData.data.stations.forEach(station => {
+      const stationId = station.station_id;
+      const capacity = capacityMap[stationId] || 0;
       const available = station.num_bikes_available || 0;
       const disabled = station.num_bikes_disabled || 0;
-      const inUse = capacity - available - disabled;
       
-      // 처음 5개 디버깅
-      if (debugCount < 5) {
-        console.log(`Station ${debugCount}: capacity=${capacity}, avail=${available}, disabled=${disabled}, inUse=${inUse}`);
-        debugCount++;
-      }
+      const inUse = capacity - available - disabled;
       
       if (inUse > 0) {
         totalInUse += inUse;
       }
     });
     
-    console.log('Total in use:', totalInUse);
+    console.log('Total bikes in use:', totalInUse);
     
     res.json({
       bikes: totalInUse,
-      energy: Math.floor(totalInUse / 100),
-      stations: data.data.stations.length,
-      debug: "check logs"
+      energy: Math.floor(totalInUse / 100)
     });
     
   } catch (error) {
@@ -50,4 +51,4 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Running on port', PORT));
+app.listen(PORT, () => console.log('Server running!'));
