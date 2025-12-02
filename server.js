@@ -4,7 +4,8 @@ const app = express();
 
 app.get('/bikes', async (req, res) => {
   try {
-    const statusRes = await fetch('https://gbfs.citibikenyc.com/gbfs/en/station_status.json');
+    // 새 Lyft API
+    const statusRes = await fetch('https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json');
     const statusData = await statusRes.json();
     
     let totalEmptyDocks = 0;
@@ -16,8 +17,6 @@ app.get('/bikes', async (req, res) => {
     });
     
     const totalSlots = totalEmptyDocks + totalBikesAvailable;
-    
-    // 빈 도크 비율 (0-100)
     const energy = Math.round((totalEmptyDocks / totalSlots) * 100);
     
     console.log('Empty:', totalEmptyDocks);
@@ -27,7 +26,7 @@ app.get('/bikes', async (req, res) => {
     res.json({
       empty_docks: totalEmptyDocks,
       bikes: totalBikesAvailable,
-      energy: energy 
+      energy: energy
     });
     
   } catch (error) {
