@@ -9,26 +9,22 @@ app.get('/bikes', async (req, res) => {
     
     let totalEmptyDocks = 0;
     let totalBikesAvailable = 0;
-    let totalEbikesAvailable = 0;     
     let totalBikesDisabled = 0;
     let totalDocksDisabled = 0;
     
     statusData.data.stations.forEach(station => {
       totalEmptyDocks += station.num_docks_available || 0;
       totalBikesAvailable += station.num_bikes_available || 0;
-      totalEbikesAvailable += station.num_ebikes_available || 0; 
       totalBikesDisabled += station.num_bikes_disabled || 0;
       totalDocksDisabled += station.num_docks_disabled || 0;
     });
     
-    // 완전한 capacity
-    const totalCapacity = totalEmptyDocks + totalBikesAvailable + totalEbikesAvailable + totalBikesDisabled + totalDocksDisabled;
+    const totalCapacity = totalBikesAvailable + totalBikesDisabled + totalEmptyDocks + totalDocksDisabled;
     const energy = Math.round((totalEmptyDocks / totalCapacity) * 100);
     
     res.json({
       empty_docks: totalEmptyDocks,
       bikes: totalBikesAvailable,
-      ebikes: totalEbikesAvailable,      
       bikes_disabled: totalBikesDisabled,
       docks_disabled: totalDocksDisabled,
       capacity: totalCapacity,
