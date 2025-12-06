@@ -7,7 +7,7 @@ app.get('/bikes', async (req, res) => {
     const statusRes = await fetch('https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json');
     const statusData = await statusRes.json();
     
-    const TOTAL_FLEET = 38000;
+    const TOTAL_FLEET = 35323;
     
     let bikesAtStations = 0;
     
